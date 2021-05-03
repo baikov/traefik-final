@@ -1,0 +1,51 @@
+api: # Enables traefik ui dashboard and api
+  insecure: false
+  dashboard: true
+
+entryPoints:
+  web:
+    address: :80
+  websecure:
+    address: :443
+providers:
+  docker: # Enables docker to be a provider from its labels
+    exposedByDefault: false # Not expose by default docker containers
+  file: # Reads all files located in /etc/traefik/*
+    watch: true
+    directory: "/etc/traefik/"
+
+certificatesResolvers: # Certs handler/resolver
+  letsencrypt:
+    acme:
+      # email: baikov52@gmail.com
+      storage: "/etc/traefik/acme/acme.json"
+      #caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      tlsChallenge: true
+      # dnsChallenge:
+      #   provider: cloudflare
+      #   resolvers:
+      #     - "1.1.1.1:53"
+      #     - "8.8.8.8:53"
+
+log:
+  level: INFO
+# accessLog: {}
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  # format: json
+  # filters:    
+  #   statusCodes:
+  #     - "200"
+  #     - "300-302"
+  #   retryAttempts: true
+  #   minDuration: "10ms"
+  fields:
+    defaultMode: keep
+    # names:
+    #   ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+          User-Agent: keep
+          Authorization: drop
+          Content-Type: keep
