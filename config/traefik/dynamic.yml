@@ -17,5 +17,14 @@ tls:
         - CurveP521
         - CurveP384
 
+# Redirect from www to non-www (not used)
+http:
+  middlewares:
+    www-redirect:
+      redirectregex:
+        regex: "^https?://(www.)?(.*)"
+        replacement: "https://${2}"
+        permanent: true
+
 # pilot:
 #   token: ""
