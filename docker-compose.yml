@@ -27,9 +27,9 @@ services:
       - "traefik.enable=true"
 
       # Redirect from www to non-www and http to https
-      - traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)
-      - traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://${2}
-      - traefik.http.middlewares.custom-redirect.redirectregex.permanent=true
+      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
+      - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://$${2}"
+      - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
       # Redirect 301 to https Middleware
       # - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       # - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
