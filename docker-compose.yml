@@ -27,8 +27,8 @@ services:
       - "traefik.enable=true"
 
       # Redirect from www to non-www and http to https
-      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https://(www.)?(.*)"
-      - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://$${2}"
+      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
+      - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=https://$${2}"
       - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
 
       # Redirect 301 to https Middleware
@@ -98,7 +98,7 @@ services:
       # Asociation with resolver (see static.yml file)
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
       # add security middleware
-      - "traefik.http.routers.nginx.middlewares=security-headers"
+      - "traefik.http.routers.nginx.middlewares=custom-redirect,security-headers"
       # Set default options (see dynamic.yaml for this)
       - "traefik.http.routers.nginx.tls.options=default"
       # loadbalancer
