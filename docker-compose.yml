@@ -51,7 +51,7 @@ services:
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
       - "traefik.http.routers.http-catchall.entrypoints=web" # Http middleware for web (http) entrypoint (see static.yaml file)
       # - "traefik.http.routers.http-catchall.middlewares=redirect-to-https,security-headers" # Add redirect and security middlewares
-      - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
+      # - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
       - "traefik.http.routers.https-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
       - "traefik.http.routers.https-catchall.entrypoints=websecure" # Http middleware for websecure (https) entrypoint (see static.yaml file)
       - "traefik.http.routers.https-catchall.middlewares=custom-redirect,security-headers" # add security middleware
