@@ -27,7 +27,7 @@ services:
       - "traefik.enable=true"
 
       # Redirect from www to non-www and http to https
-      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
+      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https://(www.)?(.*)"
       - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://$${2}"
       - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
 
@@ -64,6 +64,10 @@ services:
       - "traefik.http.routers.dashboard.middlewares=security-headers, admin"
       # - "traefik.http.routers.dashboard.tls=true"
       # - "traefik.http.routers.dashboard.tls.options=default"
+
+      # gzip compression
+      # - "traefik.http.routers.traefik.middlewares=traefik-compress"
+      # - "traefik.http.middlewares.traefik-compress.compress=true"
       
       # Basic auth for dashboard - user admin password admin
       # Use [ echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g ] to generate new password
