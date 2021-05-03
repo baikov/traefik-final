@@ -30,6 +30,7 @@ services:
       - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
       - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://$${2}"
       - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
+
       # Redirect 301 to https Middleware
       # - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       # - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
@@ -53,7 +54,7 @@ services:
       - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
       - "traefik.http.routers.https-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
       - "traefik.http.routers.https-catchall.entrypoints=websecure" # Http middleware for websecure (https) entrypoint (see static.yaml file)
-      - "traefik.http.routers.https-catchall.middlewares=security-headers" # add security middleware
+      - "traefik.http.routers.https-catchall.middlewares=custom-redirect, security-headers" # add security middleware
 
       # Secure Dashboard (http basic auth) just with localhost
       - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD}.${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
