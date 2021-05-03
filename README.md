@@ -1,4 +1,4 @@
-#Traefik
+# Traefik
 - Traefik as reverse-proxy for Django project
 - Nginx for serving media
 
