@@ -25,9 +25,14 @@ services:
       - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml # Dynamic config (min tls version and sniStrict)
     labels:
       - "traefik.enable=true"
-      # Redirect to https Middleware
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+
+      # Redirect from www to non-www and http to https
+      - traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)
+      - traefik.http.middlewares.custom-redirect.redirectregex.replacement=^https://${2}
+      - traefik.http.middlewares.custom-redirect.redirectregex.permanent=true
+      # Redirect 301 to https Middleware
+      # - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
       
       # Security headers middleware
       - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
@@ -44,7 +49,8 @@ services:
       # Rules and middlewares asociation with entrypoints
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
       - "traefik.http.routers.http-catchall.entrypoints=web" # Http middleware for web (http) entrypoint (see static.yaml file)
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https,security-headers" # Add redirect and security middlewares
+      # - "traefik.http.routers.http-catchall.middlewares=redirect-to-https,security-headers" # Add redirect and security middlewares
+      - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
       - "traefik.http.routers.https-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
       - "traefik.http.routers.https-catchall.entrypoints=websecure" # Http middleware for websecure (https) entrypoint (see static.yaml file)
       - "traefik.http.routers.https-catchall.middlewares=security-headers" # add security middleware
