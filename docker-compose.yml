@@ -27,6 +27,7 @@ services:
       - "traefik.enable=true"
       # Redirect to https Middleware
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
       
       # Security headers middleware
       - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
