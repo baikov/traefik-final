@@ -1,4 +1,4 @@
-api: # Enables traefik ui dashboard and api
+api:
   insecure: false
   dashboard: true
 
@@ -9,11 +9,15 @@ entryPoints:
     #   redirections:
     #     entryPoint:
     #       to: websecure
+    #         permanent: true
+    #         priority: 10
+    #   middlewares:
+    #     - security-headers
   websecure:
     address: :443
 providers:
-  docker: # Enables docker to be a provider from its labels
-    exposedByDefault: false # Not expose by default docker containers
+  docker:
+    exposedByDefault: false
   file: # Reads all files located in /etc/traefik/*
     watch: true
     directory: "/etc/traefik/"
@@ -21,7 +25,7 @@ providers:
 certificatesResolvers: # Certs handler/resolver
   letsencrypt:
     acme:
-      # email: baikov52@gmail.com
+      # email: mail@mail.com
       storage: "/etc/traefik/acme/acme.json"
       #caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       tlsChallenge: true
@@ -33,7 +37,7 @@ certificatesResolvers: # Certs handler/resolver
 
 log:
   level: INFO
-# accessLog: {}
+
 accessLog:
   filePath: "/var/log/traefik/access.log"
   # format: json
@@ -53,3 +57,6 @@ accessLog:
           User-Agent: keep
           Authorization: drop
           Content-Type: keep
+
+pilot:
+    token: ""

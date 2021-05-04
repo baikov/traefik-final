@@ -13,6 +13,7 @@ services:
     command:
         - --configFile=/static.yml # Initial config from static.yml file
         - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+        - --pilot.token=${PILOT_TOKEN}
     ports:
       - "80:80"
       - "443:443"
@@ -21,20 +22,36 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - prod_traefik:/etc/traefik/acme:z
       - ./log/traefik:/var/log/traefik
-      - ./config/traefik/static.yml:/static.yml # Initial static config
-      - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml # Dynamic config (min tls version and sniStrict)
+      - ./config/traefik/static.yml:/static.yml
+      - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=front"
+      
+      # Rules and middlewares asociation with entrypoints
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https,security-headers"
+      # - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
+      - "traefik.http.routers.https-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.https-catchall.entrypoints=websecure"
+      - "traefik.http.routers.https-catchall.middlewares=security-headers"
+      # - "traefik.http.routers.https-catchall.middlewares=custom-redirect,security-headers"
+
+      # Secure Dashboard (http basic auth)
+      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD}.${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.middlewares=security-headers, admin"
 
       # Redirect from www to non-www and http to https
-      - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
-      - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=https://$${2}"
-      - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
-
+      # - "traefik.http.middlewares.custom-redirect.redirectregex.regex=^https?://(www.)?(.*)"
+      # - "traefik.http.middlewares.custom-redirect.redirectregex.replacement=https://$${2}"
+      # - "traefik.http.middlewares.custom-redirect.redirectregex.permanent=true"
       # Redirect 301 to https Middleware
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
-      
       # Security headers middleware
       - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
       - "traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true"
@@ -46,34 +63,10 @@ services:
       - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
       - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
       - "traefik.http.middlewares.security-headers.headers.forceSTSHeader=true"
-      
-      # Rules and middlewares asociation with entrypoints
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
-      - "traefik.http.routers.http-catchall.entrypoints=web" # Http middleware for web (http) entrypoint (see static.yaml file)
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https,security-headers" # Add redirect and security middlewares
-      # - "traefik.http.routers.http-catchall.middlewares=custom-redirect,security-headers"
-      - "traefik.http.routers.https-catchall.rule=hostregexp(`{host:.+}`)" # Catchs all request
-      - "traefik.http.routers.https-catchall.entrypoints=websecure" # Http middleware for websecure (https) entrypoint (see static.yaml file)
-      - "traefik.http.routers.https-catchall.middlewares=security-headers" # add security middleware
-      # - "traefik.http.routers.https-catchall.middlewares=custom-redirect,security-headers" # add security middleware
-
-      # Secure Dashboard (http basic auth) just with localhost
-      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD}.${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.middlewares=security-headers, admin"
-      # - "traefik.http.routers.dashboard.tls=true"
-      # - "traefik.http.routers.dashboard.tls.options=default"
-
       # gzip compression
-      # - "traefik.http.routers.traefik.middlewares=traefik-compress"
-      # - "traefik.http.middlewares.traefik-compress.compress=true"
-      
-      # Basic auth for dashboard - user admin password admin
-      # Use [ echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g ] to generate new password
+      - "traefik.http.middlewares.gzip.compress=true"
+      # Dashboard auth
       - "traefik.http.middlewares.admin.basicauth.users=${DASHBOARD_LOG_PSW}"
-      - "traefik.docker.network=front"
 
     restart: unless-stopped
     networks:
@@ -90,21 +83,17 @@ services:
       - 80
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=front"
       - "traefik.http.routers.nginx.priority=70"
+
       - "traefik.http.routers.nginx.rule=(Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)) && PathPrefix(`/media`)"
       # - "traefik.http.routers.nginx.rule=PathPrefix(`/media`)"
       - "traefik.http.routers.nginx.entrypoints=websecure"
-      # Enables tls
       - "traefik.http.routers.nginx.tls=true"
-      # Asociation with resolver (see static.yml file)
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
-      # add security middleware
       - "traefik.http.routers.nginx.middlewares=custom-redirect,security-headers"
-      # Set default options (see dynamic.yaml for this)
       - "traefik.http.routers.nginx.tls.options=default"
-      # loadbalancer
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
-      - "traefik.docker.network=front"
 
     restart: unless-stopped
     depends_on:
