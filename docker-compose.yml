@@ -91,7 +91,7 @@ services:
       - "traefik.http.routers.nginx.entrypoints=websecure"
       - "traefik.http.routers.nginx.tls=true"
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.nginx.middlewares=custom-redirect,security-headers"
+      - "traefik.http.routers.nginx.middlewares=custom-redirect@file, security-headers"
       - "traefik.http.routers.nginx.tls.options=default"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
 
