@@ -109,18 +109,21 @@ services:
   #   user: ${XID:-1000}
   #   labels:
   #     - traefik.enable=true
-  #     - traefik.docker.network=minio-net
+  #     - traefik.docker.network=front
   #     - traefik.http.services.minio-svc.loadbalancer.server.port=9000
   #     - traefik.http.routers.minio-rtr.rule=Host(`minio.${DOMAIN}`)
   #     - traefik.http.routers.minio-rtr.entrypoints=websecure
   #     - traefik.http.routers.minio-rtr.tls=true
+  #     - "traefik.http.routers.minio-rtr.tls.certresolver=letsencrypt"
+  #     - "traefik.http.routers.minio-rtr.middlewares=security-headers"
+  #     - "traefik.http.routers.minio-rtr.tls.options=default"
   #   volumes:
-  #     - ${PRIMARY_MOUNT}:/data
+  #     - ${MINIO_VOLUME}:/data
   #   environment:
   #     - "MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}"
   #     - "MINIO_SECRET_KEY=${MINIO_SECRET_KEY}"
   #   networks:
-  #     - minio-net
+  #     - front
 
 networks:
   front:
