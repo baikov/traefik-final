@@ -10,6 +10,8 @@ services:
     build:
       context: ./config/traefik
     container_name: prod_traefik
+    security_opt:
+      - no-new-privileges:true
     command:
         - --configFile=/static.yml # Initial config from static.yml file
         - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
